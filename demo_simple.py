@@ -9,6 +9,7 @@ from presidio_anonymizer import AnonymizerEngine
 from presidio_anonymizer.entities import OperatorConfig
 from chinese_anonymizer.phone_recognizer import ChinesePhoneRecognizer
 from chinese_anonymizer.person_recognizer import ChinesePersonRecognizer
+from chinese_anonymizer.id_card_recognizer import ChineseIdCardRecognizer
 
 
 # 保持问题描述的原始代码结构，但确保它正常工作
@@ -21,7 +22,8 @@ if __name__ == "__main__":
     # 创建一个支持中文的分析器（修复原始代码中的配置问题）
     registry = RecognizerRegistry()
     registry.add_recognizer(ChinesePhoneRecognizer())
-    registry.add_recognizer(ChinesePersonRecognizer()) 
+    registry.add_recognizer(ChinesePersonRecognizer())
+    registry.add_recognizer(ChineseIdCardRecognizer()) 
     
     # 不加载默认识别器，避免 SpacyRecognizer 的冲突
     # registry.load_predefined_recognizers()  # 注释掉以避免冲突
@@ -30,7 +32,7 @@ if __name__ == "__main__":
     analyzer = AnalyzerEngine(registry=registry, supported_languages=["en"])  # 保持向后兼容性
     
     # 分析文本
-    results = analyzer.analyze(text=text, language='en', entities=["PHONE_NUMBER", "PERSON"])
+    results = analyzer.analyze(text=text, language='en', entities=["PHONE_NUMBER", "PERSON", "ID_CARD"])
     
     print("检测到的实体:")
     for result in results:
@@ -42,7 +44,8 @@ if __name__ == "__main__":
     # 脱敏处理 - 使用正确的 OperatorConfig 格式
     operators = {
         "PHONE_NUMBER": OperatorConfig("replace", {"new_value": "<PHONE>"}),
-        "PERSON": OperatorConfig("replace", {"new_value": "<NAME>"})
+        "PERSON": OperatorConfig("replace", {"new_value": "<NAME>"}),
+        "ID_CARD": OperatorConfig("replace", {"new_value": "<ID_CARD>"})
     }
     
     anonymized_text = anonymizer.anonymize(

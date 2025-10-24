@@ -12,6 +12,7 @@ from presidio_anonymizer import AnonymizerEngine
 from presidio_anonymizer.entities import OperatorConfig
 from chinese_anonymizer.phone_recognizer import ChinesePhoneRecognizer
 from chinese_anonymizer.person_recognizer import ChinesePersonRecognizer
+from chinese_anonymizer.id_card_recognizer import ChineseIdCardRecognizer
 
 
 def setup_chinese_analyzer():
@@ -22,6 +23,7 @@ def setup_chinese_analyzer():
     # 添加中文识别器
     registry.add_recognizer(ChinesePhoneRecognizer())
     registry.add_recognizer(ChinesePersonRecognizer())
+    registry.add_recognizer(ChineseIdCardRecognizer())
     
     # 不加载默认识别器，避免与 spaCy 的冲突
     # registry.load_predefined_recognizers()
@@ -49,7 +51,7 @@ def main():
     anonymizer = AnonymizerEngine()
     
     # 分析文本中的敏感实体
-    results = analyzer.analyze(text=text, language='en', entities=["PHONE_NUMBER", "PERSON"])
+    results = analyzer.analyze(text=text, language='en', entities=["PHONE_NUMBER", "PERSON", "ID_CARD"])
     
     print("检测到的实体:")
     for result in results:
@@ -59,7 +61,8 @@ def main():
     # 脱敏处理
     operators = {
         "PHONE_NUMBER": OperatorConfig("replace", {"new_value": "<PHONE>"}), 
-        "PERSON": OperatorConfig("replace", {"new_value": "<NAME>"})
+        "PERSON": OperatorConfig("replace", {"new_value": "<NAME>"}),
+    "ID_CARD": OperatorConfig("replace", {"new_value": "<ID_CARD>"})
     }
     
     anonymized_text = anonymizer.anonymize(
@@ -84,11 +87,12 @@ def main():
         print(f"\n测试用例 {i}:")
         print(f"原文: {test_text}")
         
-        results = analyzer.analyze(text=test_text, language='en', entities=["PHONE_NUMBER", "PERSON"])
+        results = analyzer.analyze(text=test_text, language='en', entities=["PHONE_NUMBER", "PERSON", "ID_CARD"])
         
         operators = {
             "PHONE_NUMBER": OperatorConfig("replace", {"new_value": "<PHONE>"}), 
-            "PERSON": OperatorConfig("replace", {"new_value": "<NAME>"})
+            "PERSON": OperatorConfig("replace", {"new_value": "<NAME>"}),
+    "ID_CARD": OperatorConfig("replace", {"new_value": "<ID_CARD>"})
         }
         
         anonymized = anonymizer.anonymize(
